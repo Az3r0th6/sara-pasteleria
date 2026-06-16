@@ -250,7 +250,7 @@
     </div>
     <div class="table-wrapper">
       <table><thead><tr>
-        <th>Insumo</th><th>Stock Inicial</th><th>Compras</th><th>Consumo</th><th>Stock Actual</th><th style="width:110px">Acciones</th>
+        <th>Insumo</th><th>Stock Inicial</th><th>Compras</th><th>Consumo (ventas)</th><th>Ajuste manual</th><th>Stock Actual</th><th style="width:110px">Acciones</th>
       </tr></thead><tbody id="body-insumos"></tbody></table>
     </div>
   </div>
@@ -349,7 +349,7 @@
     <div class="form-group"><label>Nombre *</label><input type="text" id="ins-nombre"></div>
     <div class="form-group"><label>Stock inicial</label><input type="number" id="ins-si" min="0" step="0.01" value="0"></div>
     <div class="form-group"><label>Compras</label><input type="number" id="ins-cp" min="0" step="0.01" value="0"></div>
-    <div class="form-group"><label>Consumo</label><input type="number" id="ins-co" min="0" step="0.01" value="0"></div>
+    <div class="form-group"><label>Ajuste manual (mermas, desperdicios, etc.)</label><input type="number" id="ins-co" min="0" step="0.01" value="0"></div>
     <div class="modal-footer">
       <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-insumo')">Cancelar</button>
       <button class="btn btn-sm btn-save" onclick="saveInsumo()">Guardar</button>
@@ -618,16 +618,26 @@ async function deleteInsumo(id) {
   loading(false);
 }
 
+function calcConsumoAuto(insumoId) {
+  let total = 0;
+  db.ventas.forEach(vt => {
+    const receta = db.recetas.find(r => r.producto_id === vt.producto_id && r.insumo_id === insumoId);
+    if (receta) total += parseFloat(vt.cantidad) * parseFloat(receta.cantidad);
+  });
+  return total;
+}
+
 function renderInsumos() {
   const q = (v('filter-insumos') || '').toLowerCase();
   const items = db.insumos.filter(i => i.nombre.toLowerCase().includes(q));
   const tbody = document.getElementById('body-insumos');
-  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Sin insumos.</td></tr>`; return; }
+  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Sin insumos.</td></tr>`; return; }
   tbody.innerHTML = items.map(i => {
-    const actual = i.stock_inicial + i.compras - i.consumo;
+    const consumoAuto = calcConsumoAuto(i.id);
+    const actual = i.stock_inicial + i.compras - consumoAuto - i.consumo;
     const sc = actual <= 0 ? 'stock-empty' : actual < i.stock_inicial * 0.2 ? 'stock-low' : 'stock-ok';
     return `<tr><td><strong>${esc(i.nombre)}</strong></td><td>${num(i.stock_inicial)}</td>
-      <td>${num(i.compras)}</td><td>${num(i.consumo)}</td>
+      <td>${num(i.compras)}</td><td>${num(consumoAuto)}</td><td>${num(i.consumo)}</td>
       <td class="${sc}">${num(actual)}</td>
       <td><button class="btn-sm btn-edit" onclick="editInsumo(${i.id})">✏️</button>
           <button class="btn-sm btn-delete" onclick="deleteInsumo(${i.id})">🗑️</button></td></tr>`;
