@@ -62,6 +62,7 @@
   header .logo { font-size: 32px; }
   header h1 { font-size: 22px; font-weight: 700; }
   header p  { font-size: 13px; opacity: .85; }
+  header .copyright { font-size: 11px; opacity: .6; margin-top: 2px; }
 
   nav {
     background: #fff; border-bottom: 2px solid #f0d0c8;
@@ -166,6 +167,16 @@
   .toast.show { opacity: 1; }
   .toast.ok  { background: #2ecc71; }
   .toast.err { background: #e74c3c; }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #888;
+    border-top: 1px solid #f0d0c8;
+    background: #fff;
+    margin-top: 40px;
+  }
 </style>
 </head>
 <body>
@@ -199,6 +210,7 @@
   <div>
     <h1>Sistema de Gestión · Sara Pastelería</h1>
     <p>Productos · Insumos · Recetas · Ventas · Resumen</p>
+    <p class="copyright">© 2026 Martín Calvo Ruiz. Todos los derechos reservados.</p>
   </div>
 </header>
 
@@ -305,6 +317,10 @@
     </div>
   </div>
 </main>
+
+<footer>
+  &copy; 2026 Sara Pastelería. Todos los derechos reservados. Desarrollado por Martin.
+</footer>
 
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
