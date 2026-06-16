@@ -48,3 +48,20 @@ El sistema está desarrollado con tecnologías web estándar (HTML, CSS, JS) y u
    *   **Anon Key:** Copiá la clave pública larga que empieza con `eyJ...` desde *Settings -> API -> Project API keys (anon / public)*.
 2. Hacé clic en **Conectar**. El sistema se conectará de inmediato y cambiará la barra de estado superior a verde indicando conexión exitosa.
 3. Podés utilizar el botón **🔍 Diagnosticar** para verificar si hay algún problema de red, tabla inexistente o credenciales erróneas.
+
+---
+
+## 🌐 Despliegue en Netlify
+
+Al ser una aplicación web estática (HTML/CSS/JS puro), subirla a **Netlify** y conectarla con este repositorio de GitHub es sumamente sencillo y gratuito:
+
+1. Registrate o inicia sesión en [Netlify](https://www.netlify.com/) (es recomendable iniciar sesión usando tu cuenta de **GitHub**).
+2. En tu panel de control de Netlify, haz clic en **Add new site** (Agregar nuevo sitio) y selecciona **Import an existing project** (Importar un proyecto existente).
+3. Selecciona **GitHub** como proveedor de Git y autoriza el acceso a tus repositorios.
+4. Busca y selecciona el repositorio **`sara-pasteleria`**.
+5. En la configuración de despliegue (**Build settings**), al ser una app estática sin compiladores:
+   * **Build command (Comando de construcción):** Dejalo completamente vacío.
+   * **Publish directory (Directorio de publicación):** Dejalo vacío (o con un punto `.`).
+6. Haz clic en **Deploy sara-pasteleria** (Desplegar).
+7. ¡Listo! Netlify creará un enlace público permanente. Cada vez que hagas un `git push` a tu repositorio de GitHub, Netlify actualizará el sitio automáticamente.
+
