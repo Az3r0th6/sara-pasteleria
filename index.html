@@ -1,893 +1,1444 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de Gestión - Sara Pastelería</title>
-<!-- Sin dependencias externas: usa fetch directo a la API REST de Supabase -->
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; background: #fdf6f0; color: #333; min-height: 100vh; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión - Sara Pastelería</title>
+  <!-- Sin dependencias externas: usa fetch directo a la API REST de Supabase -->
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  #config-banner {
-    background: #fff3cd; border-bottom: 2px solid #ffc107;
-    padding: 14px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  }
-  #config-banner span { font-size: 13px; font-weight: 600; color: #856404; }
-  #config-banner input {
-    padding: 7px 10px; border: 1px solid #ffc107; border-radius: 5px;
-    font-size: 12px; font-family: monospace;
-  }
-  #cfg-url { width: 300px; }
-  #cfg-key { width: 320px; }
-  #config-banner .btn-connect {
-    padding: 8px 16px; background: #c0392b; color: white;
-    border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 700;
-  }
-  #config-banner .btn-connect:hover { background: #a93226; }
-  #config-banner .btn-diag {
-    padding: 8px 14px; background: #6c757d; color: white;
-    border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600;
-  }
-  #config-banner .btn-diag:hover { background: #545b62; }
-  .cfg-link { font-size: 12px; color: #0d6efd; cursor: pointer; text-decoration: underline; }
-  #diag-box {
-    display:none; background:#1e1e1e; color:#d4d4d4;
-    padding:14px 24px; font-family:monospace; font-size:12px;
-    line-height:1.8; border-bottom: 2px solid #444; white-space: pre-wrap;
-  }
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdf6f0;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-  #help-box {
-    display: none; background: #fff8e1; padding: 12px 24px;
-    border-bottom: 1px solid #ffc107; font-size: 12px; line-height: 1.9;
-  }
-  #help-box code { background: #f0e0b0; padding: 1px 5px; border-radius: 3px; }
+    #config-banner {
+      background: #fff3cd;
+      border-bottom: 2px solid #ffc107;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-  #status-bar {
-    background: #f8f9fa; border-bottom: 1px solid #e9ecef;
-    padding: 7px 24px; font-size: 12px; display: flex; align-items: center; gap: 8px;
-  }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dot.red    { background: #dc3545; }
-  .dot.yellow { background: #ffc107; animation: blink 1s infinite; }
-  .dot.green  { background: #28a745; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #config-banner span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #856404;
+    }
 
-  header {
-    background: linear-gradient(135deg, #c0392b, #e74c3c);
-    color: white; padding: 18px 30px;
-    display: flex; align-items: center; gap: 14px;
-    box-shadow: 0 3px 10px rgba(0,0,0,.2);
-  }
-  header .logo { font-size: 32px; }
-  header h1 { font-size: 22px; font-weight: 700; }
-  header p  { font-size: 13px; opacity: .85; }
-  header .copyright { font-size: 11px; opacity: .6; margin-top: 2px; }
+    #config-banner input {
+      padding: 7px 10px;
+      border: 1px solid #ffc107;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: monospace;
+    }
 
-  nav {
-    background: #fff; border-bottom: 2px solid #f0d0c8;
-    padding: 0 20px; display: flex; gap: 4px; overflow-x: auto;
-  }
-  nav button {
-    padding: 12px 20px; border: none; background: none; cursor: pointer;
-    font-size: 14px; color: #888; font-weight: 500;
-    border-bottom: 3px solid transparent; white-space: nowrap; transition: all .2s;
-  }
-  nav button:hover { color: #c0392b; }
-  nav button.active { color: #c0392b; border-bottom-color: #c0392b; font-weight: 700; }
+    #cfg-url {
+      width: 300px;
+    }
 
-  main { padding: 24px; max-width: 1100px; margin: 0 auto; }
-  .section { display: none; }
-  .section.active { display: block; }
+    #cfg-key {
+      width: 320px;
+    }
 
-  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .section-header h2 { font-size: 20px; color: #c0392b; }
-  .section-header p  { font-size: 13px; color: #888; margin-top: 2px; }
+    #config-banner .btn-connect {
+      padding: 8px 16px;
+      background: #c0392b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
 
-  .btn { padding: 9px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
-  .btn-primary { background: #c0392b; color: white; }
-  .btn-primary:hover { background: #a93226; }
-  .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; }
-  .btn-edit   { background: #3498db; color: white; } .btn-edit:hover   { background: #2980b9; }
-  .btn-delete { background: #e74c3c; color: white; } .btn-delete:hover { background: #c0392b; }
-  .btn-save   { background: #27ae60; color: white; } .btn-save:hover   { background: #219a52; }
-  .btn-cancel { background: #95a5a6; color: white; } .btn-cancel:hover { background: #7f8c8d; }
+    #config-banner .btn-connect:hover {
+      background: #a93226;
+    }
 
-  .filter-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-  .filter-row input, .filter-row select {
-    padding: 8px 12px; border: 1px solid #e0c8c0; border-radius: 6px; font-size: 13px;
-  }
+    #config-banner .btn-diag {
+      padding: 8px 14px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
 
-  .table-wrapper { overflow-x: auto; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-  table { width: 100%; border-collapse: collapse; background: white; }
-  th { background: #c0392b; color: white; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 600; }
-  td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0e8e5; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #fdf0ed; }
-  .empty-row td { text-align: center; color: #bbb; padding: 30px; font-style: italic; }
+    #config-banner .btn-diag:hover {
+      background: #545b62;
+    }
 
-  .gain-pos    { color: #27ae60; font-weight: 700; }
-  .gain-neg    { color: #e74c3c; font-weight: 700; }
-  .stock-ok    { color: #27ae60; font-weight: 700; }
-  .stock-low   { color: #e67e22; font-weight: 700; }
-  .stock-empty { color: #e74c3c; font-weight: 700; }
+    .cfg-link {
+      font-size: 12px;
+      color: #0d6efd;
+      cursor: pointer;
+      text-decoration: underline;
+    }
 
-  .loading-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(255,255,255,.7); z-index: 200;
-    justify-content: center; align-items: center; flex-direction: column; gap: 12px;
-  }
-  .loading-overlay.show { display: flex; }
-  .spinner {
-    width: 40px; height: 40px; border: 4px solid #f0d0c8;
-    border-top-color: #c0392b; border-radius: 50%;
-    animation: spin .8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    #diag-box {
+      display: none;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 14px 24px;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      border-bottom: 2px solid #444;
+      white-space: pre-wrap;
+    }
 
-  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .kpi-card { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.07); border-left: 4px solid #c0392b; }
-  .kpi-card.green  { border-left-color: #27ae60; }
-  .kpi-card.blue   { border-left-color: #3498db; }
-  .kpi-card.orange { border-left-color: #e67e22; }
-  .kpi-label { font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
-  .kpi-value { font-size: 24px; font-weight: 700; color: #333; }
-  .kpi-value small { font-size: 14px; font-weight: 400; color: #888; }
+    #help-box {
+      display: none;
+      background: #fff8e1;
+      padding: 12px 24px;
+      border-bottom: 1px solid #ffc107;
+      font-size: 12px;
+      line-height: 1.9;
+    }
 
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; justify-content: center; align-items: center; }
-  .modal-bg.open { display: flex; }
-  .modal { background: white; border-radius: 12px; padding: 28px; width: 420px; max-width: 95%; box-shadow: 0 8px 40px rgba(0,0,0,.2); }
-  .modal h3 { font-size: 17px; color: #c0392b; margin-bottom: 18px; }
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
-  .form-group input, .form-group select {
-    width: 100%; padding: 9px 11px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px;
-  }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: #c0392b; }
-  .form-group input[readonly] { background: #f5f5f5; color: #888; }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    #help-box code {
+      background: #f0e0b0;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
 
-  .chart-section { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.08); margin-top: 24px; }
-  .chart-section h3 { font-size: 15px; color: #555; margin-bottom: 16px; }
-  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; border-bottom: 2px solid #eee; padding-bottom: 4px; }
-  .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; }
-  .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
-  .bar.vb { background: #c0392b; }
-  .bar.gb { background: #27ae60; }
-  .bar-label { font-size: 10px; color: #888; margin-top: 6px; }
-  .chart-legend { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; }
-  .ldot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+    #status-bar {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 7px 24px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  .toast {
-    position: fixed; bottom: 24px; right: 24px; color: white;
-    padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
-    box-shadow: 0 4px 14px rgba(0,0,0,.15); opacity: 0; pointer-events: none;
-    transition: opacity .3s; z-index: 999;
-  }
-  .toast.show { opacity: 1; }
-  .toast.ok  { background: #2ecc71; }
-  .toast.err { background: #e74c3c; }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
-  footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 12px;
-    color: #888;
-    border-top: 1px solid #f0d0c8;
-    background: #fff;
-    margin-top: 40px;
-  }
-</style>
+    .dot.red {
+      background: #dc3545;
+    }
+
+    .dot.yellow {
+      background: #ffc107;
+      animation: blink 1s infinite;
+    }
+
+    .dot.green {
+      background: #28a745;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    header {
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: white;
+      padding: 18px 30px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
+    }
+
+    header .logo {
+      font-size: 32px;
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 13px;
+      opacity: .85;
+    }
+
+    header .copyright {
+      font-size: 11px;
+      opacity: .6;
+      margin-top: 2px;
+    }
+
+    nav {
+      background: #fff;
+      border-bottom: 2px solid #f0d0c8;
+      padding: 0 20px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+
+    nav button {
+      padding: 12px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #888;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all .2s;
+    }
+
+    nav button:hover {
+      color: #c0392b;
+    }
+
+    nav button.active {
+      color: #c0392b;
+      border-bottom-color: #c0392b;
+      font-weight: 700;
+    }
+
+    main {
+      padding: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      flex: 1;
+      width: 100%;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 20px;
+      color: #c0392b;
+    }
+
+    .section-header p {
+      font-size: 13px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all .2s;
+    }
+
+    .btn-primary {
+      background: #c0392b;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #a93226;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-edit {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #2980b9;
+    }
+
+    .btn-delete {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #c0392b;
+    }
+
+    .btn-save {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-save:hover {
+      background: #219a52;
+    }
+
+    .btn-cancel {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .btn-cancel:hover {
+      background: #7f8c8d;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-row input,
+    .filter-row select {
+      padding: 8px 12px;
+      border: 1px solid #e0c8c0;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th {
+      background: #c0392b;
+      color: white;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 10px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid #f0e8e5;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #fdf0ed;
+    }
+
+    .empty-row td {
+      text-align: center;
+      color: #bbb;
+      padding: 30px;
+      font-style: italic;
+    }
+
+    .gain-pos {
+      color: #27ae60;
+      font-weight: 700;
+    }
+
+    .gain-neg {
+      color: #e74c3c;
+      font-weight: 700;
+    }
+
+    .stock-ok {
+      color: #27ae60;
+      font-weight: 700;
+    }
+
+    .stock-low {
+      color: #e67e22;
+      font-weight: 700;
+    }
+
+    .stock-empty {
+      color: #e74c3c;
+      font-weight: 700;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, .7);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f0d0c8;
+      border-top-color: #c0392b;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: white;
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .07);
+      border-left: 4px solid #c0392b;
+    }
+
+    .kpi-card.green {
+      border-left-color: #27ae60;
+    }
+
+    .kpi-card.blue {
+      border-left-color: #3498db;
+    }
+
+    .kpi-card.orange {
+      border-left-color: #e67e22;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .kpi-value small {
+      font-size: 14px;
+      font-weight: 400;
+      color: #888;
+    }
+
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .4);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-bg.open {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      width: 420px;
+      max-width: 95%;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .2);
+    }
+
+    .modal h3 {
+      font-size: 17px;
+      color: #c0392b;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #c0392b;
+    }
+
+    .form-group input[readonly] {
+      background: #f5f5f5;
+      color: #888;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .chart-section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+      margin-top: 24px;
+    }
+
+    .chart-section h3 {
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 160px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 4px;
+    }
+
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      min-height: 2px;
+    }
+
+    .bar.vb {
+      background: #c0392b;
+    }
+
+    .bar.gb {
+      background: #27ae60;
+    }
+
+    .bar-label {
+      font-size: 10px;
+      color: #888;
+      margin-top: 6px;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .ldot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .15);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.ok {
+      background: #2ecc71;
+    }
+
+    .toast.err {
+      background: #e74c3c;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #888;
+      border-top: 1px solid #f0d0c8;
+      background: #fff;
+      margin-top: 40px;
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="config-banner">
-  <span>⚙️ Supabase:</span>
-  <input id="cfg-url" type="text" placeholder="https://xxxx.supabase.co" />
-  <input id="cfg-key" type="text" placeholder="anon public key (empieza con eyJ...)" />
-  <button class="btn-connect" id="btn-conectar" onclick="saveConfig()">Conectar</button>
-  <button class="btn-diag" onclick="runDiag()">🔍 Diagnosticar</button>
-  <span class="cfg-link" onclick="toggleHelp()">¿Cómo obtener estos datos?</span>
-</div>
-<div id="diag-box"></div>
-
-<div id="help-box">
-  1. Andá a <strong>supabase.com</strong> → creá cuenta gratuita → New Project.<br>
-  2. En tu proyecto: <strong>Settings → API</strong>.<br>
-  3. <strong>Project URL</strong>: copialo tal cual (ej: <code>https://abcd.supabase.co</code>).<br>
-  4. <strong>anon public</strong> key: la clave larga que empieza con <code>eyJ...</code>.<br>
-  5. Ejecutá el archivo <code>supabase-setup.sql</code> en <strong>SQL Editor → New query → Run</strong>.<br>
-  6. Volvé acá y hacé clic en <strong>Conectar</strong>.
-</div>
-
-<div id="status-bar">
-  <div class="dot red" id="sdot"></div>
-  <span id="stxt">Sin conexión — configurá Supabase arriba</span>
-</div>
-
-<header>
-  <span class="logo">🎂</span>
-  <div>
-    <h1>Sistema de Gestión · Sara Pastelería</h1>
-    <p>Productos · Insumos · Recetas · Ventas · Resumen</p>
-    <p class="copyright">© 2026 Martín Calvo Ruiz. Todos los derechos reservados.</p>
+  <div id="config-banner">
+    <span>⚙️ Supabase:</span>
+    <input id="cfg-url" type="text" placeholder="https://xxxx.supabase.co" />
+    <input id="cfg-key" type="text" placeholder="anon public key (empieza con eyJ...)" />
+    <button class="btn-connect" id="btn-conectar" onclick="saveConfig()">Conectar</button>
+    <button class="btn-diag" onclick="runDiag()">🔍 Diagnosticar</button>
+    <span class="cfg-link" onclick="toggleHelp()">¿Cómo obtener estos datos?</span>
   </div>
-</header>
+  <div id="diag-box"></div>
 
-<nav>
-  <button class="active" onclick="showTab('productos',this)">🧁 Productos</button>
-  <button onclick="showTab('insumos',this)">📦 Insumos</button>
-  <button onclick="showTab('recetas',this)">📋 Recetas</button>
-  <button onclick="showTab('ventas',this)">💰 Ventas</button>
-  <button onclick="showTab('resumen',this)">📊 Resumen</button>
-</nav>
-
-<main>
-  <!-- PRODUCTOS -->
-  <div id="tab-productos" class="section active">
-    <div class="section-header">
-      <div><h2>Productos</h2><p>Catálogo con precios y costos</p></div>
-      <button class="btn btn-primary" onclick="openModal('producto')">+ Agregar producto</button>
-    </div>
-    <div class="filter-row">
-      <input type="text" id="filter-productos" placeholder="🔍 Buscar..." oninput="renderProductos()">
-    </div>
-    <div class="table-wrapper">
-      <table><thead><tr>
-        <th>Producto</th><th>Precio</th><th>Costo</th><th>Ganancia</th><th>Margen</th><th style="width:110px">Acciones</th>
-      </tr></thead><tbody id="body-productos"></tbody></table>
-    </div>
+  <div id="help-box">
+    1. Andá a <strong>supabase.com</strong> → creá cuenta gratuita → New Project.<br>
+    2. En tu proyecto: <strong>Settings → API</strong>.<br>
+    3. <strong>Project URL</strong>: copialo tal cual (ej: <code>https://abcd.supabase.co</code>).<br>
+    4. <strong>anon public</strong> key: la clave larga que empieza con <code>eyJ...</code>.<br>
+    5. Ejecutá el archivo <code>supabase-setup.sql</code> en <strong>SQL Editor → New query → Run</strong>.<br>
+    6. Volvé acá y hacé clic en <strong>Conectar</strong>.
   </div>
 
-  <!-- INSUMOS -->
-  <div id="tab-insumos" class="section">
-    <div class="section-header">
-      <div><h2>Insumos</h2><p>Control de stock</p></div>
-      <button class="btn btn-primary" onclick="openModal('insumo')">+ Agregar insumo</button>
-    </div>
-    <div class="filter-row">
-      <input type="text" id="filter-insumos" placeholder="🔍 Buscar..." oninput="renderInsumos()">
-    </div>
-    <div class="table-wrapper">
-      <table><thead><tr>
-        <th>Insumo</th><th>Stock Inicial</th><th>Compras</th><th>Consumo</th><th>Stock Actual</th><th style="width:110px">Acciones</th>
-      </tr></thead><tbody id="body-insumos"></tbody></table>
-    </div>
+  <div id="status-bar">
+    <div class="dot red" id="sdot"></div>
+    <span id="stxt">Sin conexión — configurá Supabase arriba</span>
   </div>
 
-  <!-- RECETAS -->
-  <div id="tab-recetas" class="section">
-    <div class="section-header">
-      <div><h2>Recetas</h2><p>Ingredientes por producto</p></div>
-      <button class="btn btn-primary" onclick="openModal('receta')">+ Agregar ítem</button>
+  <header>
+    <span class="logo">🎂</span>
+    <div>
+      <h1>Sistema de Gestión · Sara Pastelería</h1>
+      <p>Productos · Insumos · Recetas · Ventas · Resumen</p>
     </div>
-    <div class="filter-row">
-      <select id="filter-recetas" onchange="renderRecetas()"><option value="">— Todos los productos —</option></select>
+  </header>
+
+  <nav>
+    <button class="active" onclick="showTab('productos',this)">🧁 Productos</button>
+    <button onclick="showTab('insumos',this)">📦 Insumos</button>
+    <button onclick="showTab('recetas',this)">📋 Recetas</button>
+    <button onclick="showTab('ventas',this)">💰 Ventas</button>
+    <button onclick="showTab('resumen',this)">📊 Resumen</button>
+  </nav>
+
+  <main>
+    <!-- PRODUCTOS -->
+    <div id="tab-productos" class="section active">
+      <div class="section-header">
+        <div>
+          <h2>Productos</h2>
+          <p>Catálogo con precios y costos</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('producto')">+ Agregar producto</button>
+      </div>
+      <div class="filter-row">
+        <input type="text" id="filter-productos" placeholder="🔍 Buscar..." oninput="renderProductos()">
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Costo</th>
+              <th>Ganancia</th>
+              <th>Margen</th>
+              <th style="width:110px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="body-productos"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="table-wrapper">
-      <table><thead><tr>
-        <th>Producto</th><th>Insumo</th><th>Cantidad</th><th style="width:110px">Acciones</th>
-      </tr></thead><tbody id="body-recetas"></tbody></table>
+
+    <!-- INSUMOS -->
+    <div id="tab-insumos" class="section">
+      <div class="section-header">
+        <div>
+          <h2>Insumos</h2>
+          <p>Control de stock</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('insumo')">+ Agregar insumo</button>
+      </div>
+      <div class="filter-row">
+        <input type="text" id="filter-insumos" placeholder="🔍 Buscar..." oninput="renderInsumos()">
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Stock Inicial</th>
+              <th>Compras</th>
+              <th>Consumo</th>
+              <th>Stock Actual</th>
+              <th style="width:110px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="body-insumos"></tbody>
+        </table>
+      </div>
     </div>
+
+    <!-- RECETAS -->
+    <div id="tab-recetas" class="section">
+      <div class="section-header">
+        <div>
+          <h2>Recetas</h2>
+          <p>Ingredientes por producto</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('receta')">+ Agregar ítem</button>
+      </div>
+      <div class="filter-row">
+        <select id="filter-recetas" onchange="renderRecetas()">
+          <option value="">— Todos los productos —</option>
+        </select>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Insumo</th>
+              <th>Cantidad</th>
+              <th style="width:110px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="body-recetas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VENTAS -->
+    <div id="tab-ventas" class="section">
+      <div class="section-header">
+        <div>
+          <h2>Ventas</h2>
+          <p>Registro diario</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('venta')">+ Registrar venta</button>
+      </div>
+      <div class="filter-row">
+        <input type="month" id="filter-ventas-mes" onchange="renderVentas()">
+        <select id="filter-ventas-prod" onchange="renderVentas()">
+          <option value="">— Todos los productos —</option>
+        </select>
+        <button class="btn btn-sm btn-cancel" onclick="clearVentasFilter()">✕ Limpiar</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Total</th>
+              <th>Mes</th>
+              <th style="width:80px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="body-ventas"></tbody>
+          <tfoot>
+            <tr style="background:#fdf0ed;">
+              <td colspan="4" style="text-align:right;font-weight:700;padding:10px 14px;">TOTAL:</td>
+              <td id="total-ventas" style="font-weight:700;color:#c0392b;font-size:14px;padding:10px 14px;"></td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- RESUMEN -->
+    <div id="tab-resumen" class="section">
+      <div class="section-header">
+        <div>
+          <h2>Resumen</h2>
+          <p>Desempeño mensual</p>
+        </div>
+      </div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Ventas</th>
+              <th>Costos</th>
+              <th>Ganancia</th>
+              <th>Margen</th>
+            </tr>
+          </thead>
+          <tbody id="body-resumen"></tbody>
+        </table>
+      </div>
+      <div class="chart-section">
+        <h3>Ventas vs Ganancia por mes</h3>
+        <div class="bar-chart" id="bar-chart"></div>
+        <div class="chart-legend">
+          <span><span class="ldot" style="background:#c0392b"></span>Ventas</span>
+          <span><span class="ldot" style="background:#27ae60"></span>Ganancia</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 Martín Calvo Ruiz. Todos los derechos reservados.
+  </footer>
+
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+    <span style="font-size:13px;color:#666">Guardando...</span>
   </div>
 
-  <!-- VENTAS -->
-  <div id="tab-ventas" class="section">
-    <div class="section-header">
-      <div><h2>Ventas</h2><p>Registro diario</p></div>
-      <button class="btn btn-primary" onclick="openModal('venta')">+ Registrar venta</button>
-    </div>
-    <div class="filter-row">
-      <input type="month" id="filter-ventas-mes" onchange="renderVentas()">
-      <select id="filter-ventas-prod" onchange="renderVentas()"><option value="">— Todos los productos —</option></select>
-      <button class="btn btn-sm btn-cancel" onclick="clearVentasFilter()">✕ Limpiar</button>
-    </div>
-    <div class="table-wrapper">
-      <table><thead><tr>
-        <th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>Mes</th><th style="width:80px">Acciones</th>
-      </tr></thead>
-      <tbody id="body-ventas"></tbody>
-      <tfoot><tr style="background:#fdf0ed;">
-        <td colspan="4" style="text-align:right;font-weight:700;padding:10px 14px;">TOTAL:</td>
-        <td id="total-ventas" style="font-weight:700;color:#c0392b;font-size:14px;padding:10px 14px;"></td>
-        <td colspan="2"></td>
-      </tr></tfoot>
-      </table>
-    </div>
-  </div>
-
-  <!-- RESUMEN -->
-  <div id="tab-resumen" class="section">
-    <div class="section-header">
-      <div><h2>Resumen</h2><p>Desempeño mensual</p></div>
-    </div>
-    <div class="kpi-grid" id="kpi-grid"></div>
-    <div class="table-wrapper">
-      <table><thead><tr>
-        <th>Mes</th><th>Ventas</th><th>Costos</th><th>Ganancia</th><th>Margen</th>
-      </tr></thead><tbody id="body-resumen"></tbody></table>
-    </div>
-    <div class="chart-section">
-      <h3>Ventas vs Ganancia por mes</h3>
-      <div class="bar-chart" id="bar-chart"></div>
-      <div class="chart-legend">
-        <span><span class="ldot" style="background:#c0392b"></span>Ventas</span>
-        <span><span class="ldot" style="background:#27ae60"></span>Ganancia</span>
+  <!-- Modales -->
+  <div class="modal-bg" id="modal-producto">
+    <div class="modal">
+      <h3 id="mp-title">Nuevo Producto</h3>
+      <input type="hidden" id="prod-id">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre"
+          placeholder="Ej: Torta de chocolate"></div>
+      <div class="form-group"><label>Precio de venta ($) *</label><input type="number" id="prod-precio" min="0"
+          step="0.01"></div>
+      <div class="form-group"><label>Costo de producción ($) *</label><input type="number" id="prod-costo" min="0"
+          step="0.01"></div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-producto')">Cancelar</button>
+        <button class="btn btn-sm btn-save" onclick="saveProducto()">Guardar</button>
       </div>
     </div>
   </div>
-</main>
 
-<footer>
-  &copy; 2026 Martín Calvo Ruiz. Todos los derechos reservados.
-</footer>
-
-<div class="loading-overlay" id="loading-overlay">
-  <div class="spinner"></div>
-  <span style="font-size:13px;color:#666">Guardando...</span>
-</div>
-
-<!-- Modales -->
-<div class="modal-bg" id="modal-producto">
-  <div class="modal">
-    <h3 id="mp-title">Nuevo Producto</h3>
-    <input type="hidden" id="prod-id">
-    <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre" placeholder="Ej: Torta de chocolate"></div>
-    <div class="form-group"><label>Precio de venta ($) *</label><input type="number" id="prod-precio" min="0" step="0.01"></div>
-    <div class="form-group"><label>Costo de producción ($) *</label><input type="number" id="prod-costo" min="0" step="0.01"></div>
-    <div class="modal-footer">
-      <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-producto')">Cancelar</button>
-      <button class="btn btn-sm btn-save" onclick="saveProducto()">Guardar</button>
+  <div class="modal-bg" id="modal-insumo">
+    <div class="modal">
+      <h3 id="mi-title">Nuevo Insumo</h3>
+      <input type="hidden" id="ins-id">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="ins-nombre"></div>
+      <div class="form-group"><label>Stock inicial</label><input type="number" id="ins-si" min="0" step="0.01"
+          value="0"></div>
+      <div class="form-group"><label>Compras</label><input type="number" id="ins-cp" min="0" step="0.01" value="0">
+      </div>
+      <div class="form-group"><label>Consumo</label><input type="number" id="ins-co" min="0" step="0.01" value="0">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-insumo')">Cancelar</button>
+        <button class="btn btn-sm btn-save" onclick="saveInsumo()">Guardar</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal-bg" id="modal-insumo">
-  <div class="modal">
-    <h3 id="mi-title">Nuevo Insumo</h3>
-    <input type="hidden" id="ins-id">
-    <div class="form-group"><label>Nombre *</label><input type="text" id="ins-nombre"></div>
-    <div class="form-group"><label>Stock inicial</label><input type="number" id="ins-si" min="0" step="0.01" value="0"></div>
-    <div class="form-group"><label>Compras</label><input type="number" id="ins-cp" min="0" step="0.01" value="0"></div>
-    <div class="form-group"><label>Consumo</label><input type="number" id="ins-co" min="0" step="0.01" value="0"></div>
-    <div class="modal-footer">
-      <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-insumo')">Cancelar</button>
-      <button class="btn btn-sm btn-save" onclick="saveInsumo()">Guardar</button>
+  <div class="modal-bg" id="modal-receta">
+    <div class="modal">
+      <h3 id="mr-title">Nuevo ítem de receta</h3>
+      <input type="hidden" id="rec-id">
+      <div class="form-group"><label>Producto *</label><select id="rec-producto"></select></div>
+      <div class="form-group"><label>Insumo *</label><select id="rec-insumo"></select></div>
+      <div class="form-group"><label>Cantidad *</label><input type="number" id="rec-cantidad" min="0" step="0.001">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-receta')">Cancelar</button>
+        <button class="btn btn-sm btn-save" onclick="saveReceta()">Guardar</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal-bg" id="modal-receta">
-  <div class="modal">
-    <h3 id="mr-title">Nuevo ítem de receta</h3>
-    <input type="hidden" id="rec-id">
-    <div class="form-group"><label>Producto *</label><select id="rec-producto"></select></div>
-    <div class="form-group"><label>Insumo *</label><select id="rec-insumo"></select></div>
-    <div class="form-group"><label>Cantidad *</label><input type="number" id="rec-cantidad" min="0" step="0.001"></div>
-    <div class="modal-footer">
-      <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-receta')">Cancelar</button>
-      <button class="btn btn-sm btn-save" onclick="saveReceta()">Guardar</button>
+  <div class="modal-bg" id="modal-venta">
+    <div class="modal">
+      <h3 id="mv-title">Registrar Venta</h3>
+      <input type="hidden" id="ven-id">
+      <div class="form-group"><label>Fecha *</label><input type="date" id="ven-fecha"></div>
+      <div class="form-group"><label>Producto *</label><select id="ven-producto" onchange="autoFillPrecio()"></select>
+      </div>
+      <div class="form-group"><label>Cantidad *</label><input type="number" id="ven-cantidad" min="1" step="1" value="1"
+          oninput="calcTotal()"></div>
+      <div class="form-group"><label>Precio unitario ($)</label><input type="number" id="ven-precio" min="0" step="0.01"
+          oninput="calcTotal()"></div>
+      <div class="form-group"><label>Total ($)</label><input type="number" id="ven-total" readonly></div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-venta')">Cancelar</button>
+        <button class="btn btn-sm btn-save" onclick="saveVenta()">Guardar</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal-bg" id="modal-venta">
-  <div class="modal">
-    <h3 id="mv-title">Registrar Venta</h3>
-    <input type="hidden" id="ven-id">
-    <div class="form-group"><label>Fecha *</label><input type="date" id="ven-fecha"></div>
-    <div class="form-group"><label>Producto *</label><select id="ven-producto" onchange="autoFillPrecio()"></select></div>
-    <div class="form-group"><label>Cantidad *</label><input type="number" id="ven-cantidad" min="1" step="1" value="1" oninput="calcTotal()"></div>
-    <div class="form-group"><label>Precio unitario ($)</label><input type="number" id="ven-precio" min="0" step="0.01" oninput="calcTotal()"></div>
-    <div class="form-group"><label>Total ($)</label><input type="number" id="ven-total" readonly></div>
-    <div class="modal-footer">
-      <button class="btn btn-sm btn-cancel" onclick="closeModal('modal-venta')">Cancelar</button>
-      <button class="btn btn-sm btn-save" onclick="saveVenta()">Guardar</button>
-    </div>
-  </div>
-</div>
+  <div class="toast" id="toast"></div>
 
-<div class="toast" id="toast"></div>
+  <script>
+    // ── Config ────────────────────────────────────────────────────────
+    let SB_URL = '', SB_KEY = '';
+    let db = { productos: [], insumos: [], recetas: [], ventas: [] };
 
-<script>
-// ── Config ────────────────────────────────────────────────────────
-let SB_URL = '', SB_KEY = '';
-let db = { productos: [], insumos: [], recetas: [], ventas: [] };
-
-function toggleHelp() {
-  const h = document.getElementById('help-box');
-  h.style.display = h.style.display === 'none' ? 'block' : 'none';
-}
-
-function saveConfig() {
-  let url = (document.getElementById('cfg-url').value || '').trim();
-  let key = (document.getElementById('cfg-key').value || '').trim();
-
-  if (!url || !key) { toast('Completá URL y clave', 'err'); return; }
-
-  // Normalizar URL
-  if (!url.startsWith('http')) url = 'https://' + url;
-  try {
-    const u = new URL(url);
-    url = u.protocol + '//' + u.host;
-  } catch(e) { toast('URL inválida', 'err'); return; }
-
-  if (!url.includes('supabase.co')) { toast('URL debe incluir supabase.co', 'err'); return; }
-
-  document.getElementById('cfg-url').value = url;
-  localStorage.setItem('sb-url', url);
-  localStorage.setItem('sb-key', key);
-
-  SB_URL = url;
-  SB_KEY = key;
-  setStatus('yellow', 'Conectando...');
-  loadAll();
-}
-
-function loadConfig() {
-  const url = localStorage.getItem('sb-url') || '';
-  const key = localStorage.getItem('sb-key') || '';
-  if (url) document.getElementById('cfg-url').value = url;
-  if (key) document.getElementById('cfg-key').value = key;
-  if (url && key) { SB_URL = url; SB_KEY = key; setStatus('yellow','Conectando...'); loadAll(); }
-}
-
-// ── Supabase REST API (sin librería externa) ──────────────────────
-async function sbFetch(method, table, body, filters) {
-  let url = SB_URL + '/rest/v1/' + table;
-  if (filters) url += '?' + filters;
-  const opts = {
-    method,
-    headers: {
-      'apikey': SB_KEY,
-      'Authorization': 'Bearer ' + SB_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'return=representation' : 'return=representation'
+    function toggleHelp() {
+      const h = document.getElementById('help-box');
+      h.style.display = h.style.display === 'none' ? 'block' : 'none';
     }
-  };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(url, opts);
-  const text = await res.text();
-  if (!res.ok) {
-    let errMsg = text;
-    try { errMsg = JSON.parse(text).message || text; } catch(e) {}
-    throw new Error(errMsg);
-  }
-  return text ? JSON.parse(text) : [];
-}
 
-const sbGet    = (table, filters)       => sbFetch('GET',    table, null, filters || 'order=id');
-const sbPost   = (table, body)          => sbFetch('POST',   table, body);
-const sbPatch  = (table, id, body)      => sbFetch('PATCH',  table, body, 'id=eq.' + id);
-const sbDelete = (table, id)            => sbFetch('DELETE', table, null, 'id=eq.' + id);
+    function saveConfig() {
+      let url = (document.getElementById('cfg-url').value || '').trim();
+      let key = (document.getElementById('cfg-key').value || '').trim();
 
-// ── Load all data ─────────────────────────────────────────────────
-async function loadAll() {
-  if (!SB_URL || !SB_KEY) return;
-  try {
-    const [p, i, r, v] = await Promise.all([
-      sbGet('productos'),
-      sbGet('insumos'),
-      sbGet('recetas'),
-      sbGet('ventas', 'order=fecha.desc'),
-    ]);
-    db.productos = p; db.insumos = i; db.recetas = r; db.ventas = v;
-    setStatus('green', `✅ Conectado · ${p.length} productos · ${v.length} ventas`);
-    renderAll();
-  } catch(e) {
-    setStatus('red', '❌ ' + e.message);
-    toast('Error: ' + e.message, 'err');
-  }
-}
+      if (!url || !key) { toast('Completá URL y clave', 'err'); return; }
 
-// ── Status ────────────────────────────────────────────────────────
-function setStatus(color, msg) {
-  document.getElementById('sdot').className = 'dot ' + color;
-  document.getElementById('stxt').textContent = msg;
-}
+      // Normalizar URL
+      if (!url.startsWith('http')) url = 'https://' + url;
+      try {
+        const u = new URL(url);
+        url = u.protocol + '//' + u.host;
+      } catch (e) { toast('URL inválida', 'err'); return; }
 
-// ── Tabs ──────────────────────────────────────────────────────────
-function showTab(name, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
-  loadAll();
-}
+      if (!url.includes('supabase.co')) { toast('URL debe incluir supabase.co', 'err'); return; }
 
-// ── Modals ────────────────────────────────────────────────────────
-function openModal(type) {
-  if (!SB_URL) { toast('Primero conectá Supabase', 'err'); return; }
-  if (type === 'producto') {
-    document.getElementById('mp-title').textContent = 'Nuevo Producto';
-    ['prod-id','prod-nombre','prod-precio','prod-costo'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('modal-producto').classList.add('open');
-  } else if (type === 'insumo') {
-    document.getElementById('mi-title').textContent = 'Nuevo Insumo';
-    document.getElementById('ins-id').value = '';
-    document.getElementById('ins-nombre').value = '';
-    ['ins-si','ins-cp','ins-co'].forEach(id => document.getElementById(id).value = 0);
-    document.getElementById('modal-insumo').classList.add('open');
-  } else if (type === 'receta') {
-    pSel('rec-producto', db.productos, 'nombre');
-    pSel('rec-insumo',   db.insumos,   'nombre');
-    document.getElementById('mr-title').textContent = 'Nuevo ítem de receta';
-    document.getElementById('rec-id').value = '';
-    document.getElementById('rec-cantidad').value = '';
-    document.getElementById('modal-receta').classList.add('open');
-  } else if (type === 'venta') {
-    pSel('ven-producto', db.productos, 'nombre');
-    document.getElementById('mv-title').textContent = 'Registrar Venta';
-    document.getElementById('ven-id').value = '';
-    document.getElementById('ven-fecha').value = today();
-    document.getElementById('ven-cantidad').value = 1;
-    document.getElementById('ven-precio').value = '';
-    document.getElementById('ven-total').value = '';
-    autoFillPrecio();
-    document.getElementById('modal-venta').classList.add('open');
-  }
-}
+      document.getElementById('cfg-url').value = url;
+      localStorage.setItem('sb-url', url);
+      localStorage.setItem('sb-key', key);
 
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-bg').forEach(bg =>
-  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); })
-);
-function pSel(id, items, field) {
-  document.getElementById(id).innerHTML = items.map(i => `<option value="${i.id}">${esc(i[field])}</option>`).join('');
-}
-function loading(show) { document.getElementById('loading-overlay').classList.toggle('show', show); }
+      SB_URL = url;
+      SB_KEY = key;
+      setStatus('yellow', 'Conectando...');
+      loadAll();
+    }
 
-// ── PRODUCTOS ─────────────────────────────────────────────────────
-async function saveProducto() {
-  const nombre = v('prod-nombre');
-  const precio = parseFloat(v('prod-precio'));
-  const costo  = parseFloat(v('prod-costo'));
-  if (!nombre || isNaN(precio) || isNaN(costo)) { alert('Completá todos los campos.'); return; }
-  const id = v('prod-id');
-  loading(true);
-  try {
-    if (id) { await sbPatch('productos', id, { nombre, precio, costo }); toast('Producto actualizado'); }
-    else     { await sbPost('productos', { nombre, precio, costo });     toast('Producto agregado'); }
-    closeModal('modal-producto'); await loadAll();
-  } catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    function loadConfig() {
+      const url = localStorage.getItem('sb-url') || '';
+      const key = localStorage.getItem('sb-key') || '';
+      if (url) document.getElementById('cfg-url').value = url;
+      if (key) document.getElementById('cfg-key').value = key;
+      if (url && key) { SB_URL = url; SB_KEY = key; setStatus('yellow', 'Conectando...'); loadAll(); }
+    }
 
-function editProducto(id) {
-  const p = db.productos.find(x => x.id == id);
-  document.getElementById('mp-title').textContent = 'Editar Producto';
-  set('prod-id', p.id); set('prod-nombre', p.nombre);
-  set('prod-precio', p.precio); set('prod-costo', p.costo);
-  document.getElementById('modal-producto').classList.add('open');
-}
+    // ── Supabase REST API (sin librería externa) ──────────────────────
+    async function sbFetch(method, table, body, filters) {
+      let url = SB_URL + '/rest/v1/' + table;
+      if (filters) url += '?' + filters;
+      const opts = {
+        method,
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': method === 'POST' ? 'return=representation' : 'return=representation'
+        }
+      };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(url, opts);
+      const text = await res.text();
+      if (!res.ok) {
+        let errMsg = text;
+        try { errMsg = JSON.parse(text).message || text; } catch (e) { }
+        throw new Error(errMsg);
+      }
+      return text ? JSON.parse(text) : [];
+    }
 
-async function deleteProducto(id) {
-  if (!confirm('¿Eliminar este producto?')) return;
-  loading(true);
-  try { await sbDelete('productos', id); toast('Producto eliminado'); await loadAll(); }
-  catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    const sbGet = (table, filters) => sbFetch('GET', table, null, filters || 'order=id');
+    const sbPost = (table, body) => sbFetch('POST', table, body);
+    const sbPatch = (table, id, body) => sbFetch('PATCH', table, body, 'id=eq.' + id);
+    const sbDelete = (table, id) => sbFetch('DELETE', table, null, 'id=eq.' + id);
 
-function renderProductos() {
-  const q = (v('filter-productos') || '').toLowerCase();
-  const items = db.productos.filter(p => p.nombre.toLowerCase().includes(q));
-  const tbody = document.getElementById('body-productos');
-  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Sin productos.</td></tr>`; return; }
-  tbody.innerHTML = items.map(p => {
-    const g = p.precio - p.costo;
-    const m = p.precio > 0 ? (g/p.precio*100) : 0;
-    const gc = g >= 0 ? 'gain-pos' : 'gain-neg';
-    return `<tr><td><strong>${esc(p.nombre)}</strong></td><td>${fmt(p.precio)}</td><td>${fmt(p.costo)}</td>
+    // ── Load all data ─────────────────────────────────────────────────
+    async function loadAll() {
+      if (!SB_URL || !SB_KEY) return;
+      try {
+        const [p, i, r, v] = await Promise.all([
+          sbGet('productos'),
+          sbGet('insumos'),
+          sbGet('recetas'),
+          sbGet('ventas', 'order=fecha.desc'),
+        ]);
+        db.productos = p; db.insumos = i; db.recetas = r; db.ventas = v;
+        setStatus('green', `✅ Conectado · ${p.length} productos · ${v.length} ventas`);
+        renderAll();
+      } catch (e) {
+        setStatus('red', '❌ ' + e.message);
+        toast('Error: ' + e.message, 'err');
+      }
+    }
+
+    // ── Status ────────────────────────────────────────────────────────
+    function setStatus(color, msg) {
+      document.getElementById('sdot').className = 'dot ' + color;
+      document.getElementById('stxt').textContent = msg;
+    }
+
+    // ── Tabs ──────────────────────────────────────────────────────────
+    function showTab(name, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      btn.classList.add('active');
+      loadAll();
+    }
+
+    // ── Modals ────────────────────────────────────────────────────────
+    function openModal(type) {
+      if (!SB_URL) { toast('Primero conectá Supabase', 'err'); return; }
+      if (type === 'producto') {
+        document.getElementById('mp-title').textContent = 'Nuevo Producto';
+        ['prod-id', 'prod-nombre', 'prod-precio', 'prod-costo'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('modal-producto').classList.add('open');
+      } else if (type === 'insumo') {
+        document.getElementById('mi-title').textContent = 'Nuevo Insumo';
+        document.getElementById('ins-id').value = '';
+        document.getElementById('ins-nombre').value = '';
+        ['ins-si', 'ins-cp', 'ins-co'].forEach(id => document.getElementById(id).value = 0);
+        document.getElementById('modal-insumo').classList.add('open');
+      } else if (type === 'receta') {
+        pSel('rec-producto', db.productos, 'nombre');
+        pSel('rec-insumo', db.insumos, 'nombre');
+        document.getElementById('mr-title').textContent = 'Nuevo ítem de receta';
+        document.getElementById('rec-id').value = '';
+        document.getElementById('rec-cantidad').value = '';
+        document.getElementById('modal-receta').classList.add('open');
+      } else if (type === 'venta') {
+        pSel('ven-producto', db.productos, 'nombre');
+        document.getElementById('mv-title').textContent = 'Registrar Venta';
+        document.getElementById('ven-id').value = '';
+        document.getElementById('ven-fecha').value = today();
+        document.getElementById('ven-cantidad').value = 1;
+        document.getElementById('ven-precio').value = '';
+        document.getElementById('ven-total').value = '';
+        autoFillPrecio();
+        document.getElementById('modal-venta').classList.add('open');
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.modal-bg').forEach(bg =>
+      bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); })
+    );
+    function pSel(id, items, field) {
+      document.getElementById(id).innerHTML = items.map(i => `<option value="${i.id}">${esc(i[field])}</option>`).join('');
+    }
+    function loading(show) { document.getElementById('loading-overlay').classList.toggle('show', show); }
+
+    // ── PRODUCTOS ─────────────────────────────────────────────────────
+    async function saveProducto() {
+      const nombre = v('prod-nombre');
+      const precio = parseFloat(v('prod-precio'));
+      const costo = parseFloat(v('prod-costo'));
+      if (!nombre || isNaN(precio) || isNaN(costo)) { alert('Completá todos los campos.'); return; }
+      const id = v('prod-id');
+      loading(true);
+      try {
+        if (id) { await sbPatch('productos', id, { nombre, precio, costo }); toast('Producto actualizado'); }
+        else { await sbPost('productos', { nombre, precio, costo }); toast('Producto agregado'); }
+        closeModal('modal-producto'); await loadAll();
+      } catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
+
+    function editProducto(id) {
+      const p = db.productos.find(x => x.id == id);
+      document.getElementById('mp-title').textContent = 'Editar Producto';
+      set('prod-id', p.id); set('prod-nombre', p.nombre);
+      set('prod-precio', p.precio); set('prod-costo', p.costo);
+      document.getElementById('modal-producto').classList.add('open');
+    }
+
+    async function deleteProducto(id) {
+      if (!confirm('¿Eliminar este producto?')) return;
+      loading(true);
+      try { await sbDelete('productos', id); toast('Producto eliminado'); await loadAll(); }
+      catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
+
+    function renderProductos() {
+      const q = (v('filter-productos') || '').toLowerCase();
+      const items = db.productos.filter(p => p.nombre.toLowerCase().includes(q));
+      const tbody = document.getElementById('body-productos');
+      if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Sin productos.</td></tr>`; return; }
+      tbody.innerHTML = items.map(p => {
+        const g = p.precio - p.costo;
+        const m = p.precio > 0 ? (g / p.precio * 100) : 0;
+        const gc = g >= 0 ? 'gain-pos' : 'gain-neg';
+        return `<tr><td><strong>${esc(p.nombre)}</strong></td><td>${fmt(p.precio)}</td><td>${fmt(p.costo)}</td>
       <td class="${gc}">${fmt(g)}</td><td class="${gc}">${m.toFixed(1)}%</td>
       <td><button class="btn-sm btn-edit" onclick="editProducto(${p.id})">✏️</button>
           <button class="btn-sm btn-delete" onclick="deleteProducto(${p.id})">🗑️</button></td></tr>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-// ── INSUMOS ───────────────────────────────────────────────────────
-async function saveInsumo() {
-  const nombre = v('ins-nombre');
-  const stock_inicial = parseFloat(v('ins-si')) || 0;
-  const compras = parseFloat(v('ins-cp')) || 0;
-  const consumo = parseFloat(v('ins-co')) || 0;
-  if (!nombre) { alert('Ingresá el nombre.'); return; }
-  const id = v('ins-id');
-  loading(true);
-  try {
-    if (id) { await sbPatch('insumos', id, { nombre, stock_inicial, compras, consumo }); toast('Insumo actualizado'); }
-    else     { await sbPost('insumos', { nombre, stock_inicial, compras, consumo });     toast('Insumo agregado'); }
-    closeModal('modal-insumo'); await loadAll();
-  } catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    // ── INSUMOS ───────────────────────────────────────────────────────
+    async function saveInsumo() {
+      const nombre = v('ins-nombre');
+      const stock_inicial = parseFloat(v('ins-si')) || 0;
+      const compras = parseFloat(v('ins-cp')) || 0;
+      const consumo = parseFloat(v('ins-co')) || 0;
+      if (!nombre) { alert('Ingresá el nombre.'); return; }
+      const id = v('ins-id');
+      loading(true);
+      try {
+        if (id) { await sbPatch('insumos', id, { nombre, stock_inicial, compras, consumo }); toast('Insumo actualizado'); }
+        else { await sbPost('insumos', { nombre, stock_inicial, compras, consumo }); toast('Insumo agregado'); }
+        closeModal('modal-insumo'); await loadAll();
+      } catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
 
-function editInsumo(id) {
-  const i = db.insumos.find(x => x.id == id);
-  document.getElementById('mi-title').textContent = 'Editar Insumo';
-  set('ins-id', i.id); set('ins-nombre', i.nombre);
-  set('ins-si', i.stock_inicial); set('ins-cp', i.compras); set('ins-co', i.consumo);
-  document.getElementById('modal-insumo').classList.add('open');
-}
+    function editInsumo(id) {
+      const i = db.insumos.find(x => x.id == id);
+      document.getElementById('mi-title').textContent = 'Editar Insumo';
+      set('ins-id', i.id); set('ins-nombre', i.nombre);
+      set('ins-si', i.stock_inicial); set('ins-cp', i.compras); set('ins-co', i.consumo);
+      document.getElementById('modal-insumo').classList.add('open');
+    }
 
-async function deleteInsumo(id) {
-  if (!confirm('¿Eliminar?')) return;
-  loading(true);
-  try { await sbDelete('insumos', id); toast('Insumo eliminado'); await loadAll(); }
-  catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    async function deleteInsumo(id) {
+      if (!confirm('¿Eliminar?')) return;
+      loading(true);
+      try { await sbDelete('insumos', id); toast('Insumo eliminado'); await loadAll(); }
+      catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
 
-function renderInsumos() {
-  const q = (v('filter-insumos') || '').toLowerCase();
-  const items = db.insumos.filter(i => i.nombre.toLowerCase().includes(q));
-  const tbody = document.getElementById('body-insumos');
-  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Sin insumos.</td></tr>`; return; }
-  tbody.innerHTML = items.map(i => {
-    const actual = i.stock_inicial + i.compras - i.consumo;
-    const sc = actual <= 0 ? 'stock-empty' : actual < i.stock_inicial * 0.2 ? 'stock-low' : 'stock-ok';
-    return `<tr><td><strong>${esc(i.nombre)}</strong></td><td>${num(i.stock_inicial)}</td>
+    function renderInsumos() {
+      const q = (v('filter-insumos') || '').toLowerCase();
+      const items = db.insumos.filter(i => i.nombre.toLowerCase().includes(q));
+      const tbody = document.getElementById('body-insumos');
+      if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Sin insumos.</td></tr>`; return; }
+      tbody.innerHTML = items.map(i => {
+        const actual = i.stock_inicial + i.compras - i.consumo;
+        const sc = actual <= 0 ? 'stock-empty' : actual < i.stock_inicial * 0.2 ? 'stock-low' : 'stock-ok';
+        return `<tr><td><strong>${esc(i.nombre)}</strong></td><td>${num(i.stock_inicial)}</td>
       <td>${num(i.compras)}</td><td>${num(i.consumo)}</td>
       <td class="${sc}">${num(actual)}</td>
       <td><button class="btn-sm btn-edit" onclick="editInsumo(${i.id})">✏️</button>
           <button class="btn-sm btn-delete" onclick="deleteInsumo(${i.id})">🗑️</button></td></tr>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-// ── RECETAS ───────────────────────────────────────────────────────
-async function saveReceta() {
-  const producto_id = parseInt(v('rec-producto'));
-  const insumo_id   = parseInt(v('rec-insumo'));
-  const cantidad    = parseFloat(v('rec-cantidad'));
-  if (!producto_id || !insumo_id || isNaN(cantidad) || cantidad <= 0) { alert('Completá todos los campos.'); return; }
-  const id = v('rec-id');
-  loading(true);
-  try {
-    if (id) { await sbPatch('recetas', id, { producto_id, insumo_id, cantidad }); toast('Receta actualizada'); }
-    else     { await sbPost('recetas', { producto_id, insumo_id, cantidad });     toast('Receta agregada'); }
-    closeModal('modal-receta'); await loadAll();
-  } catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    // ── RECETAS ───────────────────────────────────────────────────────
+    async function saveReceta() {
+      const producto_id = parseInt(v('rec-producto'));
+      const insumo_id = parseInt(v('rec-insumo'));
+      const cantidad = parseFloat(v('rec-cantidad'));
+      if (!producto_id || !insumo_id || isNaN(cantidad) || cantidad <= 0) { alert('Completá todos los campos.'); return; }
+      const id = v('rec-id');
+      loading(true);
+      try {
+        if (id) { await sbPatch('recetas', id, { producto_id, insumo_id, cantidad }); toast('Receta actualizada'); }
+        else { await sbPost('recetas', { producto_id, insumo_id, cantidad }); toast('Receta agregada'); }
+        closeModal('modal-receta'); await loadAll();
+      } catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
 
-function editReceta(id) {
-  const r = db.recetas.find(x => x.id == id);
-  pSel('rec-producto', db.productos, 'nombre');
-  pSel('rec-insumo',   db.insumos,   'nombre');
-  document.getElementById('mr-title').textContent = 'Editar ítem';
-  set('rec-id', r.id);
-  document.getElementById('rec-producto').value = r.producto_id;
-  document.getElementById('rec-insumo').value   = r.insumo_id;
-  set('rec-cantidad', r.cantidad);
-  document.getElementById('modal-receta').classList.add('open');
-}
+    function editReceta(id) {
+      const r = db.recetas.find(x => x.id == id);
+      pSel('rec-producto', db.productos, 'nombre');
+      pSel('rec-insumo', db.insumos, 'nombre');
+      document.getElementById('mr-title').textContent = 'Editar ítem';
+      set('rec-id', r.id);
+      document.getElementById('rec-producto').value = r.producto_id;
+      document.getElementById('rec-insumo').value = r.insumo_id;
+      set('rec-cantidad', r.cantidad);
+      document.getElementById('modal-receta').classList.add('open');
+    }
 
-async function deleteReceta(id) {
-  if (!confirm('¿Eliminar?')) return;
-  loading(true);
-  try { await sbDelete('recetas', id); toast('Eliminado'); await loadAll(); }
-  catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    async function deleteReceta(id) {
+      if (!confirm('¿Eliminar?')) return;
+      loading(true);
+      try { await sbDelete('recetas', id); toast('Eliminado'); await loadAll(); }
+      catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
 
-function renderRecetas() {
-  const sel = document.getElementById('filter-recetas');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— Todos los productos —</option>' +
-    db.productos.map(p => `<option value="${p.id}" ${p.id == cur ? 'selected':''}>${esc(p.nombre)}</option>`).join('');
-  let items = cur ? db.recetas.filter(r => r.producto_id == cur) : db.recetas;
-  const tbody = document.getElementById('body-recetas');
-  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Sin recetas.</td></tr>`; return; }
-  tbody.innerHTML = items.map(r => {
-    const p = db.productos.find(x => x.id === r.producto_id);
-    const i = db.insumos.find(x => x.id === r.insumo_id);
-    return `<tr><td>${p ? esc(p.nombre) : '—'}</td><td>${i ? esc(i.nombre) : '—'}</td><td>${num(r.cantidad)}</td>
+    function renderRecetas() {
+      const sel = document.getElementById('filter-recetas');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— Todos los productos —</option>' +
+        db.productos.map(p => `<option value="${p.id}" ${p.id == cur ? 'selected' : ''}>${esc(p.nombre)}</option>`).join('');
+      let items = cur ? db.recetas.filter(r => r.producto_id == cur) : db.recetas;
+      const tbody = document.getElementById('body-recetas');
+      if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Sin recetas.</td></tr>`; return; }
+      tbody.innerHTML = items.map(r => {
+        const p = db.productos.find(x => x.id === r.producto_id);
+        const i = db.insumos.find(x => x.id === r.insumo_id);
+        return `<tr><td>${p ? esc(p.nombre) : '—'}</td><td>${i ? esc(i.nombre) : '—'}</td><td>${num(r.cantidad)}</td>
       <td><button class="btn-sm btn-edit" onclick="editReceta(${r.id})">✏️</button>
           <button class="btn-sm btn-delete" onclick="deleteReceta(${r.id})">🗑️</button></td></tr>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-// ── VENTAS ────────────────────────────────────────────────────────
-function autoFillPrecio() {
-  const prod = db.productos.find(p => p.id == v('ven-producto'));
-  if (prod) set('ven-precio', prod.precio);
-  calcTotal();
-}
-function calcTotal() {
-  const t = (parseFloat(v('ven-cantidad')) || 0) * (parseFloat(v('ven-precio')) || 0);
-  set('ven-total', t.toFixed(2));
-}
+    // ── VENTAS ────────────────────────────────────────────────────────
+    function autoFillPrecio() {
+      const prod = db.productos.find(p => p.id == v('ven-producto'));
+      if (prod) set('ven-precio', prod.precio);
+      calcTotal();
+    }
+    function calcTotal() {
+      const t = (parseFloat(v('ven-cantidad')) || 0) * (parseFloat(v('ven-precio')) || 0);
+      set('ven-total', t.toFixed(2));
+    }
 
-async function saveVenta() {
-  const fecha      = v('ven-fecha');
-  const producto_id = parseInt(v('ven-producto'));
-  const cantidad   = parseFloat(v('ven-cantidad'));
-  const precio     = parseFloat(v('ven-precio'));
-  if (!fecha || !producto_id || isNaN(cantidad) || isNaN(precio)) { alert('Completá todos los campos.'); return; }
-  const total = parseFloat((cantidad * precio).toFixed(2));
-  const mes   = fecha.slice(0, 7);
-  const id = v('ven-id');
-  loading(true);
-  try {
-    if (id) { await sbPatch('ventas', id, { fecha, producto_id, cantidad, precio, total, mes }); toast('Venta actualizada'); }
-    else     { await sbPost('ventas', { fecha, producto_id, cantidad, precio, total, mes });     toast('Venta registrada'); }
-    closeModal('modal-venta'); await loadAll();
-  } catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    async function saveVenta() {
+      const fecha = v('ven-fecha');
+      const producto_id = parseInt(v('ven-producto'));
+      const cantidad = parseFloat(v('ven-cantidad'));
+      const precio = parseFloat(v('ven-precio'));
+      if (!fecha || !producto_id || isNaN(cantidad) || isNaN(precio)) { alert('Completá todos los campos.'); return; }
+      const total = parseFloat((cantidad * precio).toFixed(2));
+      const mes = fecha.slice(0, 7);
+      const id = v('ven-id');
+      loading(true);
+      try {
+        if (id) { await sbPatch('ventas', id, { fecha, producto_id, cantidad, precio, total, mes }); toast('Venta actualizada'); }
+        else { await sbPost('ventas', { fecha, producto_id, cantidad, precio, total, mes }); toast('Venta registrada'); }
+        closeModal('modal-venta'); await loadAll();
+      } catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
 
-function editVenta(id) {
-  const vt = db.ventas.find(x => x.id == id);
-  pSel('ven-producto', db.productos, 'nombre');
-  document.getElementById('mv-title').textContent = 'Editar Venta';
-  set('ven-id', vt.id); set('ven-fecha', vt.fecha);
-  document.getElementById('ven-producto').value = vt.producto_id;
-  set('ven-cantidad', vt.cantidad); set('ven-precio', vt.precio); set('ven-total', vt.total);
-  document.getElementById('modal-venta').classList.add('open');
-}
+    function editVenta(id) {
+      const vt = db.ventas.find(x => x.id == id);
+      pSel('ven-producto', db.productos, 'nombre');
+      document.getElementById('mv-title').textContent = 'Editar Venta';
+      set('ven-id', vt.id); set('ven-fecha', vt.fecha);
+      document.getElementById('ven-producto').value = vt.producto_id;
+      set('ven-cantidad', vt.cantidad); set('ven-precio', vt.precio); set('ven-total', vt.total);
+      document.getElementById('modal-venta').classList.add('open');
+    }
 
-async function deleteVenta(id) {
-  if (!confirm('¿Eliminar?')) return;
-  loading(true);
-  try { await sbDelete('ventas', id); toast('Venta eliminada'); await loadAll(); }
-  catch(e) { toast('Error: ' + e.message, 'err'); }
-  loading(false);
-}
+    async function deleteVenta(id) {
+      if (!confirm('¿Eliminar?')) return;
+      loading(true);
+      try { await sbDelete('ventas', id); toast('Venta eliminada'); await loadAll(); }
+      catch (e) { toast('Error: ' + e.message, 'err'); }
+      loading(false);
+    }
 
-function clearVentasFilter() {
-  set('filter-ventas-mes', '');
-  document.getElementById('filter-ventas-prod').value = '';
-  renderVentas();
-}
+    function clearVentasFilter() {
+      set('filter-ventas-mes', '');
+      document.getElementById('filter-ventas-prod').value = '';
+      renderVentas();
+    }
 
-function renderVentas() {
-  const fm = v('filter-ventas-mes');
-  const sel = document.getElementById('filter-ventas-prod');
-  const fp  = sel.value;
-  sel.innerHTML = '<option value="">— Todos los productos —</option>' +
-    db.productos.map(p => `<option value="${p.id}" ${p.id == fp ? 'selected':''}>${esc(p.nombre)}</option>`).join('');
-  let items = [...db.ventas];
-  if (fm) items = items.filter(vt => vt.mes === fm);
-  if (fp) items = items.filter(vt => vt.producto_id == fp);
-  document.getElementById('total-ventas').textContent = fmt(items.reduce((s,vt) => s + parseFloat(vt.total), 0));
-  const tbody = document.getElementById('body-ventas');
-  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Sin ventas.</td></tr>`; return; }
-  tbody.innerHTML = items.map(vt => {
-    const p = db.productos.find(x => x.id === vt.producto_id);
-    return `<tr><td>${vt.fecha}</td><td>${p ? esc(p.nombre) : '—'}</td>
+    function renderVentas() {
+      const fm = v('filter-ventas-mes');
+      const sel = document.getElementById('filter-ventas-prod');
+      const fp = sel.value;
+      sel.innerHTML = '<option value="">— Todos los productos —</option>' +
+        db.productos.map(p => `<option value="${p.id}" ${p.id == fp ? 'selected' : ''}>${esc(p.nombre)}</option>`).join('');
+      let items = [...db.ventas];
+      if (fm) items = items.filter(vt => vt.mes === fm);
+      if (fp) items = items.filter(vt => vt.producto_id == fp);
+      document.getElementById('total-ventas').textContent = fmt(items.reduce((s, vt) => s + parseFloat(vt.total), 0));
+      const tbody = document.getElementById('body-ventas');
+      if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Sin ventas.</td></tr>`; return; }
+      tbody.innerHTML = items.map(vt => {
+        const p = db.productos.find(x => x.id === vt.producto_id);
+        return `<tr><td>${vt.fecha}</td><td>${p ? esc(p.nombre) : '—'}</td>
       <td>${vt.cantidad}</td><td>${fmt(vt.precio)}</td>
       <td><strong>${fmt(vt.total)}</strong></td><td>${vt.mes}</td>
       <td><button class="btn-sm btn-edit" onclick="editVenta(${vt.id})">✏️</button>
           <button class="btn-sm btn-delete" onclick="deleteVenta(${vt.id})">🗑️</button></td></tr>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-// ── RESUMEN ───────────────────────────────────────────────────────
-function renderResumen() {
-  const meses = {};
-  db.ventas.forEach(vt => {
-    if (!meses[vt.mes]) meses[vt.mes] = { v: 0, c: 0 };
-    meses[vt.mes].v += parseFloat(vt.total);
-    const p = db.productos.find(x => x.id === vt.producto_id);
-    if (p) meses[vt.mes].c += parseFloat(vt.cantidad) * parseFloat(p.costo);
-  });
-  const keys = Object.keys(meses).sort();
-  const tbody = document.getElementById('body-resumen');
-  if (!keys.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Sin datos aún.</td></tr>`;
-    document.getElementById('kpi-grid').innerHTML = '';
-    document.getElementById('bar-chart').innerHTML = '';
-    return;
-  }
-  const tv = keys.reduce((s,k) => s + meses[k].v, 0);
-  const tc = keys.reduce((s,k) => s + meses[k].c, 0);
-  const tg = tv - tc;
-  const tm = tv > 0 ? (tg/tv*100) : 0;
-  document.getElementById('kpi-grid').innerHTML = `
+    // ── RESUMEN ───────────────────────────────────────────────────────
+    function renderResumen() {
+      const meses = {};
+      db.ventas.forEach(vt => {
+        if (!meses[vt.mes]) meses[vt.mes] = { v: 0, c: 0 };
+        meses[vt.mes].v += parseFloat(vt.total);
+        const p = db.productos.find(x => x.id === vt.producto_id);
+        if (p) meses[vt.mes].c += parseFloat(vt.cantidad) * parseFloat(p.costo);
+      });
+      const keys = Object.keys(meses).sort();
+      const tbody = document.getElementById('body-resumen');
+      if (!keys.length) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Sin datos aún.</td></tr>`;
+        document.getElementById('kpi-grid').innerHTML = '';
+        document.getElementById('bar-chart').innerHTML = '';
+        return;
+      }
+      const tv = keys.reduce((s, k) => s + meses[k].v, 0);
+      const tc = keys.reduce((s, k) => s + meses[k].c, 0);
+      const tg = tv - tc;
+      const tm = tv > 0 ? (tg / tv * 100) : 0;
+      document.getElementById('kpi-grid').innerHTML = `
     <div class="kpi-card blue"><div class="kpi-label">Total Ventas</div><div class="kpi-value">${fmt(tv)}</div></div>
     <div class="kpi-card"><div class="kpi-label">Total Costos</div><div class="kpi-value">${fmt(tc)}</div></div>
     <div class="kpi-card green"><div class="kpi-label">Ganancia Total</div><div class="kpi-value">${fmt(tg)}</div></div>
     <div class="kpi-card orange"><div class="kpi-label">Margen Promedio</div><div class="kpi-value">${tm.toFixed(1)}<small>%</small></div></div>`;
-  tbody.innerHTML = keys.map(k => {
-    const g = meses[k].v - meses[k].c;
-    const mr = meses[k].v > 0 ? (g/meses[k].v*100) : 0;
-    const gc = g >= 0 ? 'gain-pos' : 'gain-neg';
-    return `<tr><td><strong>${k}</strong></td><td>${fmt(meses[k].v)}</td><td>${fmt(meses[k].c)}</td>
+      tbody.innerHTML = keys.map(k => {
+        const g = meses[k].v - meses[k].c;
+        const mr = meses[k].v > 0 ? (g / meses[k].v * 100) : 0;
+        const gc = g >= 0 ? 'gain-pos' : 'gain-neg';
+        return `<tr><td><strong>${k}</strong></td><td>${fmt(meses[k].v)}</td><td>${fmt(meses[k].c)}</td>
       <td class="${gc}">${fmt(g)}</td><td class="${gc}">${mr.toFixed(1)}%</td></tr>`;
-  }).join('');
-  const maxV = Math.max(...keys.map(k => meses[k].v), 1);
-  document.getElementById('bar-chart').innerHTML = keys.map(k => {
-    const hV = Math.round((meses[k].v / maxV) * 130);
-    const g  = meses[k].v - meses[k].c;
-    const hG = Math.max(0, Math.round((g / maxV) * 130));
-    return `<div class="bar-group">
+      }).join('');
+      const maxV = Math.max(...keys.map(k => meses[k].v), 1);
+      document.getElementById('bar-chart').innerHTML = keys.map(k => {
+        const hV = Math.round((meses[k].v / maxV) * 130);
+        const g = meses[k].v - meses[k].c;
+        const hG = Math.max(0, Math.round((g / maxV) * 130));
+        return `<div class="bar-group">
       <div style="display:flex;gap:2px;align-items:flex-end;height:130px">
         <div class="bar vb" style="height:${hV}px" title="${fmt(meses[k].v)}"></div>
         <div class="bar gb" style="height:${hG}px" title="${fmt(g)}"></div>
       </div>
       <div class="bar-label">${k.slice(5)}</div>
     </div>`;
-  }).join('');
-}
-
-function renderAll() { renderProductos(); renderInsumos(); renderRecetas(); renderVentas(); renderResumen(); }
-
-// ── Utils ─────────────────────────────────────────────────────────
-function v(id)    { return (document.getElementById(id)?.value || '').trim(); }
-function set(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
-function fmt(n)   { return '$' + (n||0).toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
-function num(n)   { return (n||0).toLocaleString('es-AR', { maximumFractionDigits:3 }); }
-function today()  { return new Date().toISOString().split('T')[0]; }
-function esc(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function toast(msg, type='ok') {
-  const el = document.getElementById('toast');
-  el.textContent = (type === 'ok' ? '✅ ' : '❌ ') + msg;
-  el.className = 'toast ' + type + ' show';
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-// ── Diagnóstico ───────────────────────────────────────────────────
-async function runDiag() {
-  const box = document.getElementById('diag-box');
-  box.style.display = 'block';
-
-  let url = (document.getElementById('cfg-url').value || '').trim();
-  let key = (document.getElementById('cfg-key').value || '').trim();
-
-  let log = '=== DIAGNÓSTICO DE CONEXIÓN ===\n\n';
-  log += `URL ingresada  : "${url}"\n`;
-  log += `Clave (primeros 20): "${key.slice(0,20)}..."\n\n`;
-
-  if (!url) { box.textContent = log + '❌ ERROR: URL vacía.'; return; }
-  if (!key) { box.textContent = log + '❌ ERROR: Clave vacía.'; return; }
-
-  if (!url.startsWith('http')) url = 'https://' + url;
-  try {
-    const u = new URL(url);
-    url = u.protocol + '//' + u.host;
-  } catch(e) { box.textContent = log + '❌ ERROR: URL inválida — ' + e.message; return; }
-
-  log += `URL normalizada: "${url}"\n`;
-  log += `¿Contiene supabase.co? ${url.includes('supabase.co') ? '✅ Sí' : '❌ No'}\n`;
-  log += `¿Clave empieza con eyJ? ${key.startsWith('eyJ') ? '✅ Sí' : '⚠️  No (puede funcionar igual)'}\n\n`;
-
-  log += `Probando fetch a: ${url}/rest/v1/productos?limit=1\n`;
-  box.textContent = log + '⏳ Intentando conexión...';
-
-  try {
-    const res = await fetch(url + '/rest/v1/productos?limit=1', {
-      headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
-    });
-    const text = await res.text();
-    log += `✅ Respuesta HTTP: ${res.status} ${res.statusText}\n`;
-    log += `Cuerpo: ${text.slice(0, 200)}\n\n`;
-    if (res.ok) {
-      log += '✅ ¡CONEXIÓN EXITOSA! Las tablas responden correctamente.';
-    } else if (res.status === 401 || res.status === 403) {
-      log += '❌ ERROR 401/403: Clave incorrecta o sin permisos.\n';
-      log += '→ Asegurate de usar la clave "anon public" de Settings → API.';
-    } else if (res.status === 404) {
-      log += '❌ ERROR 404: La tabla "productos" no existe.\n';
-      log += '→ Ejecutá el archivo supabase-setup.sql en el SQL Editor de Supabase.';
-    } else {
-      log += `❌ ERROR ${res.status}: ${text}`;
+      }).join('');
     }
-  } catch(e) {
-    log += `❌ EXCEPCIÓN: ${e.name} - ${e.message}\n\n`;
-    if (e.name === 'TypeError') {
-      log += '→ Posibles causas:\n';
-      log += '   1. La URL es incorrecta o el proyecto Supabase no existe\n';
-      log += '   2. Sin conexión a internet\n';
-      log += '   3. El navegador bloqueó la solicitud (CORS)\n\n';
-      log += `→ URL exacta intentada: ${url}/rest/v1/productos?limit=1`;
+
+    function renderAll() { renderProductos(); renderInsumos(); renderRecetas(); renderVentas(); renderResumen(); }
+
+    // ── Utils ─────────────────────────────────────────────────────────
+    function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+    function set(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+    function fmt(n) { return '$' + (n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function num(n) { return (n || 0).toLocaleString('es-AR', { maximumFractionDigits: 3 }); }
+    function today() { return new Date().toISOString().split('T')[0]; }
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function toast(msg, type = 'ok') {
+      const el = document.getElementById('toast');
+      el.textContent = (type === 'ok' ? '✅ ' : '❌ ') + msg;
+      el.className = 'toast ' + type + ' show';
+      setTimeout(() => el.classList.remove('show'), 3000);
     }
-  }
 
-  box.textContent = log;
-}
+    // ── Diagnóstico ───────────────────────────────────────────────────
+    async function runDiag() {
+      const box = document.getElementById('diag-box');
+      box.style.display = 'block';
 
-// ── Init ──────────────────────────────────────────────────────────
-loadConfig();
-</script>
+      let url = (document.getElementById('cfg-url').value || '').trim();
+      let key = (document.getElementById('cfg-key').value || '').trim();
+
+      let log = '=== DIAGNÓSTICO DE CONEXIÓN ===\n\n';
+      log += `URL ingresada  : "${url}"\n`;
+      log += `Clave (primeros 20): "${key.slice(0, 20)}..."\n\n`;
+
+      if (!url) { box.textContent = log + '❌ ERROR: URL vacía.'; return; }
+      if (!key) { box.textContent = log + '❌ ERROR: Clave vacía.'; return; }
+
+      if (!url.startsWith('http')) url = 'https://' + url;
+      try {
+        const u = new URL(url);
+        url = u.protocol + '//' + u.host;
+      } catch (e) { box.textContent = log + '❌ ERROR: URL inválida — ' + e.message; return; }
+
+      log += `URL normalizada: "${url}"\n`;
+      log += `¿Contiene supabase.co? ${url.includes('supabase.co') ? '✅ Sí' : '❌ No'}\n`;
+      log += `¿Clave empieza con eyJ? ${key.startsWith('eyJ') ? '✅ Sí' : '⚠️  No (puede funcionar igual)'}\n\n`;
+
+      log += `Probando fetch a: ${url}/rest/v1/productos?limit=1\n`;
+      box.textContent = log + '⏳ Intentando conexión...';
+
+      try {
+        const res = await fetch(url + '/rest/v1/productos?limit=1', {
+          headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+        });
+        const text = await res.text();
+        log += `✅ Respuesta HTTP: ${res.status} ${res.statusText}\n`;
+        log += `Cuerpo: ${text.slice(0, 200)}\n\n`;
+        if (res.ok) {
+          log += '✅ ¡CONEXIÓN EXITOSA! Las tablas responden correctamente.';
+        } else if (res.status === 401 || res.status === 403) {
+          log += '❌ ERROR 401/403: Clave incorrecta o sin permisos.\n';
+          log += '→ Asegurate de usar la clave "anon public" de Settings → API.';
+        } else if (res.status === 404) {
+          log += '❌ ERROR 404: La tabla "productos" no existe.\n';
+          log += '→ Ejecutá el archivo supabase-setup.sql en el SQL Editor de Supabase.';
+        } else {
+          log += `❌ ERROR ${res.status}: ${text}`;
+        }
+      } catch (e) {
+        log += `❌ EXCEPCIÓN: ${e.name} - ${e.message}\n\n`;
+        if (e.name === 'TypeError') {
+          log += '→ Posibles causas:\n';
+          log += '   1. La URL es incorrecta o el proyecto Supabase no existe\n';
+          log += '   2. Sin conexión a internet\n';
+          log += '   3. El navegador bloqueó la solicitud (CORS)\n\n';
+          log += `→ URL exacta intentada: ${url}/rest/v1/productos?limit=1`;
+        }
+      }
+
+      box.textContent = log;
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────
+    loadConfig();
+  </script>
 </body>
+
 </html>
